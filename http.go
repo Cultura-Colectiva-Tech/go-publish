@@ -35,11 +35,6 @@ func makePetition(method, url string, body []byte, token *string, params map[str
 	}
 	defer res.Body.Close()
 
-	// We need a better handle of this kind of errors
-	if res.StatusCode >= 500 {
-		return nil, err
-	}
-
 	response := make(map[string]interface{})
 
 	err = json.NewDecoder(res.Body).Decode(&response)
@@ -51,7 +46,7 @@ func makePetition(method, url string, body []byte, token *string, params map[str
 		data, _ := json.Marshal(response)
 
 		red := color.New(color.FgRed).SprintFunc()
-		log.Fatalf("\nThe server has responded with: \"%s\" to the petition: %s on: %s\n", red(string(data[:])), red(req.Method), red(req.URL))
+		log.Fatalf("\nThe server has responded with: \"%s\" to the petition: %s on: %s\n", red(string(data[:])), green(req.Method), green(req.URL))
 	}
 
 	return response, nil
