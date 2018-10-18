@@ -79,16 +79,26 @@ func handleArticles(data []interface{}, total int) {
 	for index, articleRaw := range data {
 		article := articleRaw.(map[string]interface{})
 
+		attributes := article["attributes"].(map[string]interface{})
+
 		articleID := article["id"].(string)
 
 		articlesUrlPublish := articlesUrl + "/" + articleID + "/publish"
 
+		defaultAttributes := map[string]interface{}{
+			"when":        attributes["publishedAt"].(string),
+			"isRepublish": true,
+		}
+
+		if *setDate == 1 {
+			defaultAttributes["when"] = "now"
+			delete(defaultAttributes, "isRepublish")
+		}
+
 		dataPublish := map[string]interface{}{
 			"data": map[string]interface{}{
-				"type": "flats",
-				"attributes": map[string]string{
-					"when": "now",
-				},
+				"type":       "flats",
+				"attributes": defaultAttributes,
 			},
 		}
 
@@ -104,7 +114,6 @@ func handleArticles(data []interface{}, total int) {
 			log.Fatalln(err)
 		}
 
-		attributes := article["attributes"].(map[string]interface{})
 		category := attributes["category"].(string)
 		seo := attributes["seo"].(map[string]interface{})
 
