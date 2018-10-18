@@ -86,13 +86,12 @@ func handleArticles(data []interface{}, total int) {
 		articlesUrlPublish := articlesUrl + "/" + articleID + "/publish"
 
 		defaultAttributes := map[string]interface{}{
-			"when":        attributes["publishedAt"].(string),
-			"isRepublish": true,
+			"when": "now",
 		}
 
-		if *setDate == 1 {
-			defaultAttributes["when"] = "now"
-			delete(defaultAttributes, "isRepublish")
+		if *keepPublishDate {
+			defaultAttributes["when"] = attributes["publishedAt"].(string)
+			defaultAttributes["isRepublish"] = true
 		}
 
 		dataPublish := map[string]interface{}{
