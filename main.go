@@ -18,6 +18,7 @@ var (
 	limitFlag       *string
 	pageFlag        *string
 	tokenFlag       *string
+	keepPublishDate *bool
 )
 
 func main() {
@@ -28,6 +29,7 @@ func main() {
 	limitFlag = flag.String("limit", "50", "Limit of items in the response")
 	pageFlag = flag.String("page", "1", "Number of the page where start")
 	tokenFlag = flag.String("token", "", "Token needed for make the petition")
+	keepPublishDate = flag.Bool("keep-publish-date", false, "Flag to keep publish date")
 
 	flag.Parse()
 
