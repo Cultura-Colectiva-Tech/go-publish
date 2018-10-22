@@ -6,18 +6,19 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/fatih/color"
 )
 
 var (
-	articlesUrl = ""
+	articlesURL = ""
 	green       = color.New(color.FgGreen).SprintFunc()
 	red         = color.New(color.FgRed).SprintFunc()
 )
 
 func publishArticles() {
-	articlesUrl = urlPrefix + *environmentFlag + urlServiceAPI + urlSuffix + "articles"
+	articlesURL = urlPrefix + currentAPI + urlSuffix + "articles"
 
 	params := map[string]string{
 		"status": "STATUS_PUBLISHED",
@@ -25,7 +26,7 @@ func publishArticles() {
 		"page":   *pageFlag,
 	}
 
-	response, err := makePetition(http.MethodGet, articlesUrl, nil, tokenFlag, params)
+	response, err := makePetition(http.MethodGet, articlesURL, nil, tokenFlag, params)
 	if err != nil {
 		log.Fatalln(red(err))
 	}
@@ -41,7 +42,7 @@ func publishArticles() {
 			"page":   strconv.FormatInt(actual, 10),
 		}
 
-		response, err := makePetition(http.MethodGet, articlesUrl, nil, tokenFlag, params)
+		response, err := makePetition(http.MethodGet, articlesURL, nil, tokenFlag, params)
 		if err != nil {
 			log.Fatalln(red(err))
 		}
@@ -83,7 +84,7 @@ func handleArticles(data []interface{}, total int) {
 
 		articleID := article["id"].(string)
 
-		articlesUrlPublish := articlesUrl + "/" + articleID + "/publish"
+		articlesURLPublish := articlesURL + "/" + articleID + "/publish"
 
 		defaultAttributes := map[string]interface{}{
 			"when": "now",
@@ -108,7 +109,7 @@ func handleArticles(data []interface{}, total int) {
 
 		fmt.Printf("Publishing article (%s of %s) with id: %s", green(index+1), green(total), green(articleID))
 
-		_, err = makePetition(http.MethodPost, articlesUrlPublish, dataPublishCasted, tokenFlag, nil)
+		_, err = makePetition(http.MethodPost, articlesURLPublish, dataPublishCasted, tokenFlag, nil)
 		if err != nil {
 			log.Fatalln(err)
 		}
@@ -123,7 +124,16 @@ func handleArticles(data []interface{}, total int) {
 
 		slug := seo["slug"].(string)
 
-		urlArticlePublished := urlPrefix + *environmentFlag + urlServiceHTML + urlSuffix + category + "/" + slug + ".html"
+		urlArticlePublished := urlPrefix + *environmentFlag + urlServiceHTML + urlSuffix + category + "/" + slug
+
+		if *environmentFlag == "prod" || *environmentFlag == "staging" {
+			newValue := ""
+			if *environmentFlag == "staging" {
+				newValue = "beta-www."
+			}
+
+			urlArticlePublished = strings.Replace(urlArticlePublished, *environmentFlag+".html.", newValue, -1)
+		}
 
 		fmt.Printf(", in: %s\n", green(urlArticlePublished))
 	}
