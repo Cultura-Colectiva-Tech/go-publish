@@ -25,7 +25,7 @@ func publishArticleByID(ids []string) {
 
 	items := len(ids)
 
-	fmt.Printf("Processing: %s Pages\n", green(items))
+	fmt.Printf("Processing: %s items\n", green(items))
 
 	for index, id := range ids {
 		URL := articlesURL + "/" + id
