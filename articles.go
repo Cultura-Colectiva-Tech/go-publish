@@ -11,21 +11,24 @@ import (
 )
 
 var (
-	articlesUrl = ""
+	articlesURL = ""
 	green       = color.New(color.FgGreen).SprintFunc()
 	red         = color.New(color.FgRed).SprintFunc()
 )
 
 func publishArticles() {
-	articlesUrl = urlPrefix + *environmentFlag + urlServiceAPI + urlSuffix + "articles"
+	articlesURL = urlPrefix + *environmentFlag + urlServiceAPI + urlSuffix + "articles"
 
 	params := map[string]string{
-		"status": "STATUS_PUBLISHED",
-		"limit":  *limitFlag,
-		"page":   *pageFlag,
+		"filter.type":      *typePostFlag,
+		"filter.status":    *statusPostFlag,
+		"filter.startDate": *startDateFlag,
+		"filter.endDate":   *endDateFlag,
+		"limit":            *limitFlag,
+		"page":             *pageFlag,
 	}
 
-	response, err := makePetition(http.MethodGet, articlesUrl, nil, tokenFlag, params)
+	response, err := makePetition(http.MethodGet, articlesURL, nil, tokenFlag, params)
 	if err != nil {
 		log.Fatalln(red(err))
 	}
@@ -36,12 +39,15 @@ func publishArticles() {
 
 	for actual <= total {
 		params := map[string]string{
-			"status": "STATUS_PUBLISHED",
-			"limit":  *limitFlag,
-			"page":   strconv.FormatInt(actual, 10),
+			"filter.type":      *typePostFlag,
+			"filter.status":    *statusPostFlag,
+			"filter.startDate": *startDateFlag,
+			"filter.endDate":   *endDateFlag,
+			"limit":            *limitFlag,
+			"page":             strconv.FormatInt(actual, 10),
 		}
 
-		response, err := makePetition(http.MethodGet, articlesUrl, nil, tokenFlag, params)
+		response, err := makePetition(http.MethodGet, articlesURL, nil, tokenFlag, params)
 		if err != nil {
 			log.Fatalln(red(err))
 		}
@@ -83,7 +89,7 @@ func handleArticles(data []interface{}, total int) {
 
 		articleID := article["id"].(string)
 
-		articlesUrlPublish := articlesUrl + "/" + articleID + "/publish"
+		articlesURLPublish := articlesURL + "/" + articleID + "/publish"
 
 		defaultAttributes := map[string]interface{}{
 			"when": "now",
@@ -108,7 +114,7 @@ func handleArticles(data []interface{}, total int) {
 
 		fmt.Printf("Publishing article (%s of %s) with id: %s", green(index+1), green(total), green(articleID))
 
-		_, err = makePetition(http.MethodPost, articlesUrlPublish, dataPublishCasted, tokenFlag, nil)
+		_, err = makePetition(http.MethodPost, articlesURLPublish, dataPublishCasted, tokenFlag, nil)
 		if err != nil {
 			log.Fatalln(err)
 		}
