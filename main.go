@@ -41,9 +41,9 @@ func main() {
 		"staging": "staging.api",
 	}
 
-	currentAPI = configEnvs[*environmentFlag]
-
 	flag.Parse()
+
+	currentAPI = configEnvs[*environmentFlag]
 
 	if *v || *version {
 		fmt.Printf("go-publish version %s\n", appVersion)

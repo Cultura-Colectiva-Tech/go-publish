@@ -22,7 +22,7 @@ func publishArticleByID(ids []string) {
 
 	params := map[string]string{}
 
-	articlesURL = urlPrefix + *environmentFlag + urlServiceAPI + urlSuffix + "articles"
+	articlesURL = urlPrefix + currentAPI + urlSuffix + "articles"
 
 	items := len(ids)
 
