@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/fatih/color"
 )
@@ -21,7 +22,7 @@ func publishArticleByID(ids []string) {
 
 	params := map[string]string{}
 
-	articlesURL = urlPrefix + *environmentFlag + urlServiceAPI + urlSuffix + "articles"
+	articlesURL = urlPrefix + currentAPI + urlSuffix + "articles"
 
 	items := len(ids)
 
@@ -86,7 +87,7 @@ func publishArticleByID(ids []string) {
 }
 
 func publishArticles() {
-	articlesURL = urlPrefix + *environmentFlag + urlServiceAPI + urlSuffix + "articles"
+	articlesURL = urlPrefix + currentAPI + urlSuffix + "articles"
 
 	params := map[string]string{
 		"status": "STATUS_PUBLISHED",
@@ -197,7 +198,16 @@ func handleArticles(data []interface{}, total int) {
 
 		slug := seo["slug"].(string)
 
-		urlArticlePublished := urlPrefix + *environmentFlag + urlServiceHTML + urlSuffix + category + "/" + slug + ".html"
+		urlArticlePublished := urlPrefix + *environmentFlag + urlServiceHTML + urlSuffix + category + "/" + slug
+
+		if *environmentFlag == "prod" || *environmentFlag == "staging" {
+			newValue := ""
+			if *environmentFlag == "staging" {
+				newValue = "beta-www."
+			}
+
+			urlArticlePublished = strings.Replace(urlArticlePublished, *environmentFlag+".html.", newValue, -1)
+		}
 
 		fmt.Printf(", in: %s\n", green(urlArticlePublished))
 	}
