@@ -90,9 +90,12 @@ func publishArticles() {
 	articlesURL = urlPrefix + currentAPI + urlSuffix + "articles"
 
 	params := map[string]string{
-		"status": "STATUS_PUBLISHED",
-		"limit":  *limitFlag,
-		"page":   *pageFlag,
+		"filter.type":      *typePostFlag,
+		"filter.status":    *statusPostFlag,
+		"filter.startDate": *startDateFlag,
+		"filter.endDate":   *endDateFlag,
+		"limit":            *limitFlag,
+		"page":             *pageFlag,
 	}
 
 	response, err := makePetition(http.MethodGet, articlesURL, nil, tokenFlag, params)
@@ -106,9 +109,12 @@ func publishArticles() {
 
 	for actual <= total {
 		params := map[string]string{
-			"status": "STATUS_PUBLISHED",
-			"limit":  *limitFlag,
-			"page":   strconv.FormatInt(actual, 10),
+			"filter.type":      *typePostFlag,
+			"filter.status":    *statusPostFlag,
+			"filter.startDate": *startDateFlag,
+			"filter.endDate":   *endDateFlag,
+			"limit":            *limitFlag,
+			"page":             strconv.FormatInt(actual, 10),
 		}
 
 		response, err := makePetition(http.MethodGet, articlesURL, nil, tokenFlag, params)
