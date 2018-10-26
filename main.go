@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"strings"
 )
 
 const (
@@ -20,6 +21,7 @@ var (
 	tokenFlag       *string
 	keepPublishDate *bool
 	currentAPI      string
+	publishIdsFlag  *string
 )
 
 func main() {
@@ -31,6 +33,7 @@ func main() {
 	pageFlag = flag.String("page", "1", "Number of the page where start")
 	tokenFlag = flag.String("token", "", "Token needed for make the petition")
 	keepPublishDate = flag.Bool("keep-publish-date", false, "Flag to keep publish date")
+	publishIdsFlag = flag.String("publish-ids", "", "Publish by article id")
 
 	configEnvs := map[string]string{
 		"dev":     "dev.api",
@@ -45,6 +48,13 @@ func main() {
 	if *v || *version {
 		fmt.Printf("go-publish version %s\n", appVersion)
 		os.Exit(0)
+	}
+
+	if *publishIdsFlag != "" {
+		articlesID := strings.Split(*publishIdsFlag, ",")
+		if len(articlesID) > 0 {
+			publishArticleByID(articlesID)
+		}
 	}
 
 	if *tokenFlag == "" {
