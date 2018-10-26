@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
+	"strings"
 
 	"github.com/fatih/color"
 )
@@ -16,8 +18,76 @@ var (
 	red         = color.New(color.FgRed).SprintFunc()
 )
 
+func publishArticleByID(ids []string) {
+
+	params := map[string]string{}
+
+	articlesURL = urlPrefix + currentAPI + urlSuffix + "articles"
+
+	items := len(ids)
+
+	fmt.Printf("Processing: %s items\n", green(items))
+
+	for index, id := range ids {
+		URL := articlesURL + "/" + id
+		response, err := makePetition(http.MethodGet, URL, nil, tokenFlag, params)
+		if err != nil {
+			log.Fatalln(red(err))
+		}
+
+		attributes := response["attributes"].(map[string]interface{})
+
+		defaultAttributes := map[string]interface{}{
+			"when": "now",
+		}
+
+		if *keepPublishDate {
+			defaultAttributes["when"] = attributes["publishedAt"].(string)
+			defaultAttributes["isRepublish"] = true
+		}
+
+		dataPublish := map[string]interface{}{
+			"data": map[string]interface{}{
+				"type":       "flats",
+				"attributes": defaultAttributes,
+			},
+		}
+
+		dataPublishCasted, err := json.Marshal(dataPublish)
+		if err != nil {
+			log.Fatalln(red(err))
+		}
+
+		fmt.Printf("Publishing article (%s of %s) with id: %s", green(index+1), green(items), green(id))
+
+		publishURL := articlesURL + "/" + id + "/publish"
+		_, err = makePetition(http.MethodPost, publishURL, dataPublishCasted, tokenFlag, nil)
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		if attributes["category"] == nil {
+			fmt.Printf(". This article doesn't have %s\n", red("category"))
+			continue
+		}
+
+		category := attributes["category"].(string)
+		seo := attributes["seo"].(map[string]interface{})
+
+		if seo["slug"] == nil {
+			fmt.Printf(". This article doesn't have %s\n", red("slug"))
+			continue
+		}
+		slug := seo["slug"].(string)
+		urlArticlePublished := urlPrefix + *environmentFlag + urlServiceHTML + urlSuffix + category + "/" + slug + ".html"
+		fmt.Printf(", in: %s\n", green(urlArticlePublished))
+	}
+
+	os.Exit(0)
+}
+
 func publishArticles() {
-	articlesURL = urlPrefix + *environmentFlag + urlServiceAPI + urlSuffix + "articles"
+	articlesURL = urlPrefix + currentAPI + urlSuffix + "articles"
 
 	params := map[string]string{
 		"filter.type":      *typePostFlag,
@@ -119,6 +189,11 @@ func handleArticles(data []interface{}, total int) {
 			log.Fatalln(err)
 		}
 
+		if attributes["category"] == nil {
+			fmt.Printf(". This article doesn't have %s\n", red("category"))
+			continue
+		}
+
 		category := attributes["category"].(string)
 		seo := attributes["seo"].(map[string]interface{})
 
@@ -129,7 +204,16 @@ func handleArticles(data []interface{}, total int) {
 
 		slug := seo["slug"].(string)
 
-		urlArticlePublished := urlPrefix + *environmentFlag + urlServiceHTML + urlSuffix + category + "/" + slug + ".html"
+		urlArticlePublished := urlPrefix + *environmentFlag + urlServiceHTML + urlSuffix + category + "/" + slug
+
+		if *environmentFlag == "prod" || *environmentFlag == "staging" {
+			newValue := ""
+			if *environmentFlag == "staging" {
+				newValue = "beta-www."
+			}
+
+			urlArticlePublished = strings.Replace(urlArticlePublished, *environmentFlag+".html.", newValue, -1)
+		}
 
 		fmt.Printf(", in: %s\n", green(urlArticlePublished))
 	}
