@@ -32,7 +32,7 @@ func publishArticleByID(ids []string) {
 		URL := articlesURL + "/" + id
 		response, err := makePetition(http.MethodGet, URL, nil, tokenFlag, params)
 		if err != nil {
-			log.Fatalln(red(err))
+			log.Println(red(err))
 		}
 
 		attributes := response["attributes"].(map[string]interface{})
@@ -55,7 +55,7 @@ func publishArticleByID(ids []string) {
 
 		dataPublishCasted, err := json.Marshal(dataPublish)
 		if err != nil {
-			log.Fatalln(red(err))
+			log.Println(red(err))
 		}
 
 		fmt.Printf("Publishing article (%s of %s) with id: %s", green(index+1), green(items), green(id))
@@ -63,7 +63,7 @@ func publishArticleByID(ids []string) {
 		publishURL := articlesURL + "/" + id + "/publish"
 		_, err = makePetition(http.MethodPost, publishURL, dataPublishCasted, tokenFlag, nil)
 		if err != nil {
-			log.Fatalln(err)
+			log.Println(err)
 		}
 
 		if attributes["category"] == nil {
@@ -100,7 +100,7 @@ func publishArticles() {
 
 	response, err := makePetition(http.MethodGet, articlesURL, nil, tokenFlag, params)
 	if err != nil {
-		log.Fatalln(red(err))
+		log.Println(red(err))
 	}
 
 	paginate := response["metadata"].(map[string]interface{})["paginate"].(map[string]interface{})
@@ -119,7 +119,7 @@ func publishArticles() {
 
 		response, err := makePetition(http.MethodGet, articlesURL, nil, tokenFlag, params)
 		if err != nil {
-			log.Fatalln(red(err))
+			log.Println(red(err))
 		}
 
 		paginate := response["metadata"].(map[string]interface{})["paginate"].(map[string]interface{})
@@ -179,14 +179,16 @@ func handleArticles(data []interface{}, total int) {
 
 		dataPublishCasted, err := json.Marshal(dataPublish)
 		if err != nil {
-			log.Fatalln(red(err))
+			log.Println(red(err))
+			continue
 		}
 
 		fmt.Printf("Publishing article (%s of %s) with id: %s", green(index+1), green(total), green(articleID))
 
 		_, err = makePetition(http.MethodPost, articlesURLPublish, dataPublishCasted, tokenFlag, nil)
 		if err != nil {
-			log.Fatalln(err)
+			log.Println(err)
+			continue
 		}
 
 		if attributes["category"] == nil {
