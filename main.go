@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"flag"
 	"fmt"
 	"os"
@@ -15,17 +16,18 @@ const (
 )
 
 var (
-	environmentFlag *string
-	limitFlag       *string
-	pageFlag        *string
-	tokenFlag       *string
-	keepPublishDate *bool
-	startDateFlag   *string
-	endDateFlag     *string
-	typePostFlag    *string
-	statusPostFlag  *string
-	currentAPI      string
-	publishIdsFlag  *string
+	environmentFlag    *string
+	limitFlag          *string
+	pageFlag           *string
+	tokenFlag          *string
+	keepPublishDate    *bool
+	startDateFlag      *string
+	endDateFlag        *string
+	typePostFlag       *string
+	statusPostFlag     *string
+	currentAPI         string
+	publishIdsFlag     *string
+	publishIdsFileFlag *string
 )
 
 func main() {
@@ -42,6 +44,7 @@ func main() {
 	typePostFlag = flag.String("type-post", "VIDEO", "Article type to be searched. Default: video")
 	statusPostFlag = flag.String("status-post", "STATUS_PUBLISHED", "Article status to be searched. Default: published")
 	publishIdsFlag = flag.String("publish-ids", "", "Publish by article id")
+	publishIdsFileFlag = flag.String("publish-ids-file", "", "Flag to get ids from file")
 
 	configEnvs := map[string]string{
 		"dev":     "dev.api",
@@ -58,10 +61,29 @@ func main() {
 		os.Exit(0)
 	}
 
-	if *publishIdsFlag != "" {
-		articlesID := strings.Split(*publishIdsFlag, ",")
-		if len(articlesID) > 0 {
-			publishArticleByID(articlesID)
+	if *publishIdsFlag != "" || *publishIdsFileFlag != "" {
+
+		ids := []string{}
+
+		// Ids from file local
+		if *publishIdsFileFlag != "" {
+			file, error := os.Open(*publishIdsFileFlag)
+			if error != nil {
+				fmt.Println("Can't read file")
+			}
+			defer file.Close()
+
+			scanner := bufio.NewScanner(file)
+			for scanner.Scan() {
+				text := strings.Trim(scanner.Text(), " ")
+				ids = append(ids, text)
+			}
+		} else {
+			ids = strings.Split(*publishIdsFlag, ",")
+		}
+
+		if len(ids) > 0 {
+			publishArticleByID(ids)
 		}
 	}
 
