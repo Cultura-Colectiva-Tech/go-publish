@@ -28,6 +28,7 @@ var (
 	currentAPI         string
 	publishIdsFlag     *string
 	publishIdsFileFlag *string
+	siteFrontendURL    string
 )
 
 func main() {
@@ -48,13 +49,20 @@ func main() {
 
 	configEnvs := map[string]string{
 		"dev":     "dev.api",
-		"prod":    "api-v2",
 		"staging": "staging.api",
+		"prod":    "api-v2",
+	}
+
+	configOrigin := map[string]string{
+		"dev":     "dev.cms",
+		"staging": "staging.cms",
+		"prod":    "cms2",
 	}
 
 	flag.Parse()
 
 	currentAPI = configEnvs[*environmentFlag]
+	siteFrontendURL = urlPrefix + configOrigin[*environmentFlag] + urlSuffix
 
 	if *v || *version {
 		fmt.Printf("go-publish version %s\n", appVersion)
